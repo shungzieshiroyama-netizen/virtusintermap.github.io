@@ -1,0 +1,16 @@
+# Afterlight Tracker — static site, no build step required.
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Long cache for the large map JPEGs (they are immutable assets)
+[[headers]]
+  for = "/maps/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
