@@ -1,0 +1,23 @@
+MAP DATA ATTRIBUTION
+====================
+
+Rosebridge map series — "Rosebridge" (Copenhagen and surrounding areas)
+
+  rosebridge.jpg           full-detail master (11776×11264, source for the rest)
+  rosebridge_overview.jpg  moderate-quality whole map (menu + overview mode)
+  rosebridge_menu.jpg      menu grid image
+  sectors/rosebridge_*.jpg 9 native-resolution sector crops (a1 … c3)
+
+Rendering: fully custom vector artwork — pale road network on a muted
+teal-green "fabric" base, inspired by open-world game atlas styles.
+No labels, no addresses, no satellite imagery in the final artwork.
+
+Source data: © OpenStreetMap contributors — www.openstreetmap.org/copyright
+(roads, railways, waterways, parks and lakes licensed under ODbL).
+Sea / Øresund geometry derived once from Esri World Imagery basemap tiles
+(Maxar, Earthstar Geographics, and the GIS User Community) © Esri and its
+licensors — www.esri.com — used only as a shoreline mask, not visible imagery.
+
+Rendered as a static one-off composite for personal roleplay use.
+
+NEXA emblem © the respective owners; uploaded by the app operator.
