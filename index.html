@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIRTUS // CHARACTER TRACKER</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ══════════ LOADING SCREEN ══════════ -->
+<div id="loader">
+  <div class="ld-inner">
+    <img class="ld-seal" src="assets/nexa.png" alt="NEXA Arms Division emblem">
+    <div class="ld-title">NEXA ARMS DIVISION</div>
+    <div class="ld-sub">VIRTUS TRACKER</div>
+    <div class="ld-bar"><span></span></div>
+    <div class="ld-status">ESTABLISHING UPLINK…</div>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- ══════════ TOP BAR ══════════ -->
+  <header id="topbar">
+    <div class="tb-group tb-brand">
+      <img class="brand-seal" src="assets/nexa-96.png" alt="NEXA Arms Division emblem">
+      <div class="brand-text">
+        <span class="brand-title">VIRTUS</span>
+        <span class="brand-sub">NEXA ARMS DIVISION</span>
+      </div>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <button class="tb-btn" id="btnMaps" title="Switch map / sectors">
+      <span class="ico">▦</span> MAPS <span id="mapNameTag" class="tag">—</span>
+    </button>
+
+    <div class="tb-sep"></div>
+
+    <div class="tb-group" id="modeGroup" role="group" title="Interaction mode">
+      <button class="tb-btn mode" data-mode="select" title="Select / pan mode (V)"><span class="ico">⌖</span> SELECT</button>
+      <button class="tb-btn mode active" data-mode="add" title="Click map to place a character (N)"><span class="ico">＋</span> ADD</button>
+      <button class="tb-btn mode" data-mode="loc" title="Click map to mark a fixed location (B)"><span class="ico">⌂</span> LOC</button>
+      <button class="tb-btn mode" data-mode="ping" title="Click map to drop a ping (P)"><span class="ico">⚑</span> PING</button>
+      <button class="tb-btn mode hidden" data-mode="warn" data-admin="1" title="Click map to drop a warning ping — howler activity (W)"><span class="ico">⚠</span> WARN</button>
+      <button class="tb-btn mode hidden" data-mode="shade" data-admin="1" title="Click map to shade a red zone (S)"><span class="ico">◍</span> SHADE</button>
+    </div>
+
+    <button class="tb-btn" id="btnAdmin" title="Admin mode — control red zones &amp; warning pings"><span class="ico">🔒</span> ADMIN</button>
+
+    <div class="tb-search">
+      <span class="search-ico">⌕</span>
+      <input id="searchInput" type="text" placeholder="FIND CHARACTER…" autocomplete="off" spellcheck="false">
+    </div>
+
+    <div class="tb-spacer"></div>
+
+    <button class="tb-btn" id="btnUndo" title="Undo (Ctrl+Z)"><span class="ico">↶</span></button>
+    <button class="tb-btn" id="btnRedo" title="Redo (Ctrl+Y)"><span class="ico">↷</span></button>
+
+    <div class="tb-sep"></div>
+
+    <button class="tb-btn" id="btnLabels" title="Show / hide name labels (L)"><span class="ico">≡</span> LABELS</button>
+    <button class="tb-btn" id="btnList" title="Toggle character list panel"><span class="ico">☰</span> LIST</button>
+
+    <div class="tb-sep"></div>
+
+    <button class="tb-btn" id="btnShot" title="Export screenshot of current view"><span class="ico">▣</span> CAPTURE</button>
+    <button class="tb-btn" id="btnExport" title="Export setup as JSON (Ctrl+S)"><span class="ico">⇩</span> EXPORT</button>
+    <button class="tb-btn" id="btnImport" title="Import setup from JSON"><span class="ico">⇧</span> IMPORT</button>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+
+    <div class="tb-sep"></div>
+
+    <button class="tb-btn" id="btnTheme" title="Toggle interface theme"><span class="ico">◐</span></button>
+    <button class="tb-btn" id="btnLive" title="Live sync — share this board in real time"><span class="ico">◉</span> LIVE</button>
+    <button class="tb-btn" id="btnHelp" title="Keyboard shortcuts (?)"><span class="ico">?</span></button>
+  </header>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <div id="main">
+
+    <div id="viewport">
+      <div id="world">
+        <div id="tileLayer" style="display:none"></div>
+        <img id="mapImg" alt="map" draggable="false">
+        <div id="shadeLayer"></div>
+      </div>
+      <div id="hud">
+        <div id="pingLayer"></div>
+        <div id="locLayer"></div>
+        <div id="markerLayer"></div>
+      </div>
+
+      <div id="fxGrid"></div>
+      <div id="fxScan"></div>
+      <div class="corner c-tl"></div><div class="corner c-tr"></div>
+      <div class="corner c-bl"></div><div class="corner c-br"></div>
+
+      <!-- floating popover (add / edit / ping) -->
+      <div id="pop" class="hidden"></div>
+
+      <!-- hint chip -->
+      <div id="hint" class="hidden">CLICK THE MAP TO POSITION A CHARACTER</div>
+
+      <!-- coordinate readout -->
+      <div id="coords" class="hidden">
+        <span id="coordX">X: 0</span><span class="csep">·</span><span id="coordY">Y: 0</span>
+      </div>
+
+      <!-- zoom cluster -->
+      <div id="zoomCtl">
+        <button class="z-btn" id="zOut" title="Zoom out (−)">−</button>
+        <button class="z-btn z-val" id="zLevel" title="Zoom to 100%">100%</button>
+        <button class="z-btn" id="zIn" title="Zoom in (+)">＋</button>
+        <div class="z-sep"></div>
+        <button class="z-btn" id="zFit" title="Fit map to screen (F)">FIT</button>
+        <button class="z-btn" id="zFull" title="Fullscreen">⤢</button>
+      </div>
+
+      <!-- toast stack -->
+      <div id="toasts"></div>
+
+      <!-- loading veil -->
+      <div id="veil"><div class="veil-inner"><span class="veil-spin">◈</span> LOADING MAP…</div></div>
+    </div>
+
+    <!-- ══════════ SIDEBAR ══════════ -->
+    <aside id="sidebar" data-tab="pings">
+      <div class="side-tabs" id="sideTabs">
+        <button class="side-tab on" data-tab="pings">STORY PINGS</button>
+        <button class="side-tab" data-tab="chars">CHARACTERS</button>
+        <button class="side-tab" data-tab="locs">LOCATIONS</button>
+      </div>
+      <div class="side-head s-chars">
+        <span class="side-title">CHARACTERS</span>
+        <span class="side-count" id="charCount">0</span>
+      </div>
+      <div id="charList" class="side-scroll s-chars"></div>
+      <div class="side-foot s-chars">
+        <button class="mini-btn" id="btnHideAll">HIDE ALL</button>
+        <button class="mini-btn" id="btnShowAll">SHOW ALL</button>
+        <button class="mini-btn danger" id="btnClear">CLEAR MAP</button>
+      </div>
+
+      <div class="side-head locs-head s-locs">
+        <span class="side-title">LOCATIONS</span>
+        <span class="side-count" id="locCount">0</span>
+      </div>
+      <div id="locList" class="side-scroll short s-locs"></div>
+
+      <div class="side-head pings-head s-pings">
+        <span class="side-title">STORY PINGS</span>
+        <span class="side-count" id="pingCount">0</span>
+      </div>
+      <div id="pingList" class="side-scroll short s-pings"></div>
+    </aside>
+  </div>
+
+  <!-- ══════════ STATUS BAR ══════════ -->
+  <footer id="statusbar">
+    <span class="st-item"><span class="st-dot ok" id="stDot"></span><span id="stOnline">MAP ONLINE</span></span>
+    <span class="st-sep">/</span>
+    <span class="st-item" id="stMap">—</span>
+    <span class="st-sep">/</span>
+    <span class="st-item" id="stChars">0 CHARACTERS</span>
+    <span class="st-sep">/</span>
+    <span class="st-item" id="stLocs">0 LOCATIONS</span>
+    <span class="st-sep">/</span>
+    <span class="st-item" id="stPings">0 PINGS</span>
+    <span class="st-sep">/</span>
+    <span class="st-item" id="stZoom">ZOOM 100%</span>
+    <span class="st-spacer"></span>
+    <span class="st-item sync"><span class="st-dot sync-dot" id="syncDot"></span><span id="syncText">SYNCHRONISED</span></span>
+  </footer>
+
+  <!-- ══════════ MAP DRAWER ══════════ -->
+  <div id="mapDrawer" class="hidden">
+    <div class="drawer-head">
+      <span id="drawerTitle">SELECT MAP</span>
+      <button class="x-btn" id="drawerClose">✕</button>
+    </div>
+    <div id="mapGrid"></div>
+  </div>
+
+  <!-- ══════════ MODAL ══════════ -->
+  <div id="modal" class="hidden">
+    <div class="modal-veil"></div>
+    <div class="modal-card">
+      <div class="modal-title" id="modalTitle">CONFIRM</div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ LIVE SYNC PANEL ══════════ -->
+  <div id="liveModal" class="hidden">
+    <div class="modal-veil"></div>
+    <div class="modal-card live-card">
+      <div class="modal-title">◉ LIVE SYNC — INSTANT BOARD SHARING</div>
+      <div class="modal-body">
+        <div id="liveStatus" class="live-status"></div>
+        <div class="fld">
+          <label class="fld-lab" for="liveBoard">BOARD CODE (everyone on the same code shares the same markers)</label>
+          <input id="liveBoard" class="fld-inp" type="text" placeholder="public" maxlength="40" spellcheck="false" autocomplete="off">
+          <div class="fld-help">Share the board code with your group — e.g. <b>virtus-crew</b>. You can also link directly: <b>your-url.netlify.app/?board=virtus-crew</b></div>
+        </div>
+        <div class="fld">
+          <label class="fld-lab" for="liveName">YOUR CALL SIGN (shown on presence counter)</label>
+          <input id="liveName" class="fld-inp" type="text" placeholder="OPERATOR" maxlength="24" spellcheck="false" autocomplete="off">
+        </div>
+        <div class="fld">
+          <label class="fld-lab" for="liveConfig">ADVANCED: CUSTOM FIREBASE CONFIG (leave empty to use the built-in database)</label>
+          <textarea id="liveConfig" class="fld-inp live-ta" spellcheck="false"></textarea>
+          <div class="fld-help">Built-in live sync is preconfigured — no setup required. Paste your own Firebase config only if you want your markers on a private database.</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="mini-btn" id="liveForget">FORGET CONFIG</button>
+        <button class="mini-btn" id="liveDisconnect">DISCONNECT</button>
+        <button class="mini-btn" id="liveClose">CLOSE</button>
+        <button class="mini-btn primary" id="liveConnect">CONNECT ▸ GO LIVE</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="uploadMap" accept="image/*,.kmz,application/vnd.google-earth.kmz" hidden>
+</div>
+
+<!-- Firebase SDK (compat) for live sync; the app works offline if these fail to load -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="app.js"></script>
+<script src="sync.js"></script>
+<script>
+/* last-resort loader dismissal (app.js handles the normal path) */
+setTimeout(function () {
+  var l = document.getElementById('loader');
+  if (l && !l.classList.contains('done')) { l.classList.add('done'); setTimeout(function () { l.remove(); }, 700); }
+}, 8000);
+</script>
+</body>
+</html>
